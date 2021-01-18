@@ -14,17 +14,17 @@ coord  = 8 * npt^(1/ptdim) * rand(npt, ptdim);
 max_leaf_npt = 300;
 htree = hierarchical_partition(coord, max_leaf_npt, ptdim);
 
-%% 2. Generate proxy surface point
+%% 2. Select sample points
 alpha  = 1;
-reltol = 1e-5;
-num_pp = ceil(-log10(reltol));
-num_pp = 2 * ptdim * num_pp * num_pp;
-Yp = H2__ProxyPoint_Surface(htree, ptdim, alpha, num_pp);
+tau    = 0.7;
+reltol = 1e-4;
+approx_rank = H2_sample_approx_rank(tau, reltol);
+sample_pt   = H2_select_sample(htree, approx_rank, alpha);
 
-%% 3. H2 matrix construction using proxy points
+%% 3. H2 matrix construction using sample points
 JIT_flag = true; 
 tic;
-h2mat = Mat2H2_ID_Proxy(kernel, htree, Yp, 'reltol', reltol, alpha, JIT_flag);
+h2mat = Mat2H2_ID_sample(kernel, htree, sample_pt, 'reltol', reltol, alpha, JIT_flag);
 h2_build_t = toc;
 fprintf('H2 construction time = %.3f\n', h2_build_t);
 

@@ -1,14 +1,14 @@
-function sample_idx = H2_select_cluster_sample(coord, grid_size, algo)
+function sample_idx = H2_select_cluster_sample(pt_dim, coord, grid_size, algo)
 % For each point in the generated anchor grid, choose O(1) nearest points 
 % in the given point cluster as sample points
 % Input parameters:
+%   pt_dim    : Point dimension
 %   coord     : Size npt * dim, target point cluster, each row is a point coordinate
 %   grid_size : Size dim, size of the anchor grid (number of anchor points in each dimension)
 %   algo      : Anchor grid generation algorithm
 % Output parameter:
 %   sample_idx : Size unknown column vector, ranged [1, npt], indices of chosen sample points
 
-    dim = size(coord, 2);
     grid_size1 = grid_size + 1;
     npt_anchor = prod(grid_size1);
     coord_max  = max(coord);
@@ -16,12 +16,12 @@ function sample_idx = H2_select_cluster_sample(coord, grid_size, algo)
     enbox_size = coord_max - coord_min;
 
     %% Assign anchor points in each dimension
-    anchor_dim = cell(1, dim);
+    anchor_dim = cell(1, pt_dim);
     if (min(grid_size) == 0)
         zero_list = (grid_size == 0);
         anchor_dim(zero_list) = num2cell((coord_max(zero_list) + coord_min(zero_list)) / 2);
     end
-    idx = 1 : dim;
+    idx = 1 : pt_dim;
     idx = idx(grid_size > 0);
     if (algo == 2)
         % Chebyshev anchor points
@@ -49,10 +49,10 @@ function sample_idx = H2_select_cluster_sample(coord, grid_size, algo)
     end
 
     %% Do a tensor product to get all anchor points
-    anchor_coord = zeros(npt_anchor, dim);
+    anchor_coord = zeros(npt_anchor, pt_dim);
     stride = [1 cumprod(grid_size1)];
     for idx = 1 : npt_anchor
-        for i_dim = 1 : dim
+        for i_dim = 1 : pt_dim
             dim_idx = mod(floor(idx / stride(i_dim)), grid_size1(i_dim)) + 1;
             anchor_coord(idx, i_dim) = anchor_dim{i_dim}(dim_idx);
         end
@@ -60,6 +60,6 @@ function sample_idx = H2_select_cluster_sample(coord, grid_size, algo)
 
     %% Choose nearest points in the given point cluster
     m = 1;
-    [~, idx] = pdist2(coord, anchor_coord, 'euclidean', 'Smallest', m);
+    [~, idx] = pdist2(coord(:, 1 : pt_dim), anchor_coord, 'euclidean', 'Smallest', m);
     sample_idx = unique(idx(:));
 end

@@ -15,6 +15,7 @@ function sample_pt = H2_select_sample(htree, approx_rank, alpha)
     children  = htree.children;
     coord     = htree.coord;
     cluster   = htree.cluster;
+    pt_dim    = size(htree.enbox{1}, 2);
     far_list  = cell(n_node, 1);
     for i = 1 : size(far_pairs, 1)
         c1 = far_pairs(i, 1);
@@ -52,9 +53,10 @@ function sample_pt = H2_select_sample(htree, approx_rank, alpha)
             if (npt_refine <= 5), continue; end
             % Volume sampling, estimate ri_vol = number of sample points in this node
             node_enbox_size = max(clu_refine{node}) - min(clu_refine{node});
+            node_enbox_size = node_enbox_size(1 : pt_dim);
             [ri_list, ri_vol] = proportional_decompose(node_enbox_size, ri);
             if (ri_vol < npt_refine)
-                sample_idx = H2_select_cluster_sample(clu_refine{node}, ri_list, 6);
+                sample_idx = H2_select_cluster_sample(pt_dim, clu_refine{node}, ri_list, 6);
                 clu_refine{node} = clu_refine{node}(sample_idx, :);
             end
         end
@@ -77,10 +79,11 @@ function sample_pt = H2_select_sample(htree, approx_rank, alpha)
 
             % Refine initial sample points
             sample_enbox_size = max(sample_pt{node}) - min(sample_pt{node});
+            sample_enbox_size = sample_enbox_size(1 : pt_dim);
             [ri_list, ri_vol] = proportional_decompose(sample_enbox_size, ri);
             n_sample = size(sample_pt{node}, 1);
             if (ri_vol < n_sample)
-                sample_idx = H2_select_cluster_sample(sample_pt{node}, ri_list, 2);
+                sample_idx = H2_select_cluster_sample(pt_dim, sample_pt{node}, ri_list, 2);
                 sample_pt{node} = sample_pt{node}(sample_idx, :);
             end
 

@@ -1,22 +1,21 @@
 %%  Kernel Function/Matrix Definition
-kernel = @(coord)multiquadric(coord, 1/2, 100);
-% kernel = @(coord)reciprocal(coord, 1);
+% kernel = @(coord)multiquadric(coord, 1/2, 100);
+kernel = @(coord)reciprocal(coord, 1);
 % kernel = @(coord)exponential(coord, 0.1);
 % kernel = @(coord)gaussian(coord, 0.1);
 
 %%  Point generation
-npts = 80000;
+npts = 40000;
 dim = 3;
 coord = npts^(1/3)*rand(npts, dim);
 
 %%  STEP1: Hierarchical partitioning 
 minSize = 200;
 htree = hierarchical_partition(coord, minSize, dim);
-clear coord; % htree has a reorder copy of coord
 
 %%  STEP2: Proxy Point Selection
 alpha =  1;
-reltol = 1e-3;
+reltol = 1e-6;
 %   Scheme 1: proxy surface method, only works for kernel from
 %   potential theory;
 % Yp = H2__ProxyPoint_Surface(htree, dim, alpha, 600);
@@ -34,7 +33,7 @@ u_h2 = H2_matvec(h2mat, htree, x);
 
 %   error checking
 idx = randperm(npts, 1000);
-u_exact = kernel({htree.coord(idx, :), htree.coord}) * x;
+u_exact = kernel({coord(idx, :), coord}) * x;
 err = sqrt(sum((u_h2(idx, :)-u_exact).^2, 1) ) ./ sqrt(sum(u_exact.^2, 1));
 
 fprintf("min/mean/max relative errors for 10 matvecs:\n%.3e,%.3e,%.3e\n", ...

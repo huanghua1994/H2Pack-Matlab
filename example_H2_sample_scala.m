@@ -47,7 +47,7 @@ tic;
 u_h2   = H2_matvec(h2mat, htree, x);
 h2_matvec_t = toc;
 idx    = randperm(npt, 2000);
-u_ref  = kernel({htree.coord(idx, :), htree.coord}) * x;
+u_ref  = kernel({coord(idx, :), coord}) * x;
 u_h2_p = u_h2(idx, :);
 relerr = zeros(n_test, 1);
 for i = 1 : n_test

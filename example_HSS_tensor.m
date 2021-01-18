@@ -12,7 +12,6 @@ coord = 8*npts^(1/dim) * [rand(npts, 2), zeros(npts, 1)];
 %%  STEP1: Hierarchical partitioning 
 minSize = 200;
 htree = hierarchical_partition(coord, minSize, dim);
-clear coord; % htree has a reorder copy of coord
 
 %%  STEP2: Proxy Point Selection for far field interaction
 alpha_pp =  1;
@@ -33,7 +32,7 @@ x = randn(kdim*npts, 10);
 u_hss = H2_matvec(hssmat, htree, x);
 %   error checking
 idx = 1:600;
-u_exact = kernel({htree.coord(idx, :), htree.coord}) * x;
+u_exact = kernel({coord(idx, :), coord}) * x;
 err = sqrt(sum((u_hss(1:(600*kdim), :)-u_exact).^2, 1) ) ./ sqrt(sum(u_exact.^2, 1));
 fprintf("min/mean/max relative errors in 10 matvec:\n%.3e,%.3e,%.3e\n", ...
     min(err), mean(err), max(err));
